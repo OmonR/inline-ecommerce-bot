@@ -1,7 +1,10 @@
 from db import orders_db
+from config import ADMIN_ID
 from utils.utils import format_order
 from keyboards.admin_keyboards import processing_order_buttons, process_order_buttons
 
+def is_admin(user_id: int) -> bool:
+    return user_id in ADMIN_ID
 
 async def decline_order(bot, message, order_id, decline_reason="не указано"):
     order_declined = await orders_db.cancel_order(order_id)

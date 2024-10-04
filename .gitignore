@@ -1,0 +1,6 @@
+toDoList
+.env
+bot.db
+venv/
+__pycache__/
+*.pyc

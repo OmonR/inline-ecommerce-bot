@@ -1,4 +1,4 @@
-from config import MIN_ORDER_PRICE, ADDRESSES, ADMIN_ID
+from config import MIN_ORDER_PRICE, ADDRESSES, ADMIN_ID, SUPPORT_USERNAME
 from aiogram import types, Dispatcher, Bot, F
 from aiogram.filters import Command
 from keyboards.user_keyboards import (
@@ -56,7 +56,7 @@ def register_user_handlers(dp: Dispatcher, bot: Bot):
     @dp.message(lambda message: message.text == "⚡️ Каталог")
     async def main_menu(message: types.Message):
         markup = await go_to_catalogue()
-        await message.answer(text=f"Прямые продажи и поддержка: ", reply_markup=markup)
+        await message.answer(text=f"Прямые продажи и поддержка: {SUPPORT_USERNAME}", reply_markup=markup)
 
     @dp.inline_query(F.query == "catalogue")
     async def catalogue(inline_query: types.InlineQuery):
@@ -162,7 +162,7 @@ def register_user_handlers(dp: Dispatcher, bot: Bot):
         )
 
     @dp.callback_query(lambda c: c.data.startswith("listorder"))
-    async def user_check_order(callback_query: types.CallbackQuery):
+    async def user_list_order(callback_query: types.CallbackQuery):
         order_id = int(callback_query.data.split("_")[1])
 
         order = await orders_db.get_order_by_id(order_id)
@@ -249,9 +249,7 @@ def register_user_handlers(dp: Dispatcher, bot: Bot):
         user_id = callback_query.from_user.id
         message_text = await get_cart_message(user_id)
         buttons = ADDRESSES 
-        callbacks = [
-            f"address_{address}" for address in buttons
-        ] 
+        callbacks = [f"address_{i}" for i in range(len(buttons))]
 
         markup = generate_inline_keyboard(
             buttons=buttons,
@@ -301,6 +299,17 @@ def register_user_handlers(dp: Dispatcher, bot: Bot):
 
         await users_db.update_user_geo(user_id, address)
         await message.answer(f"Ваш адрес сохранён: {address}")
+        message_text = await get_cart_message(user_id)
+        markup = create_order_buttons()
+        user = await users_db.get_user_by_id(user_id)
+        await bot.send_message(
+            chat_id=message.chat.id,
+            text="<b>Ваш заказ</b>\n\n"
+            + message_text
+            + f"\n\n<i>Адрес доставки: {str(user['geo'])}</i>",
+            reply_markup=markup,
+            parse_mode="HTML",
+        )
         await state.clear()
 
     @dp.callback_query(lambda c: c.data.startswith("check_payment"))
@@ -321,7 +330,7 @@ def register_user_handlers(dp: Dispatcher, bot: Bot):
             markup = decline_order_button(order_id)
             formatted_order = await format_order(order)
             await callback_query.message.answer(
-                formatted_order, reply_markup=markup, parse_mode="HTML"
+                formatted_order+'\nВаши заказы: /orders', reply_markup=markup, parse_mode="HTML"
             )
         else:
             await callback_query.answer("Предыдущий заказ ещё в обработке")

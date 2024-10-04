@@ -1,6 +1,5 @@
 from aiogram.fsm.context import FSMContext
 from aiogram.filters import Command
-from config import ADMIN_ID
 from aiogram import types, Dispatcher, Bot, F
 from db import products_db, orders_db
 from keyboards.admin_keyboards import (
@@ -11,12 +10,7 @@ from keyboards.admin_keyboards import (
 from states.admin_states import AddProduct, DeleteProduct, CancelOrderReason
 from utils.utils import escape_html
 from keyboards.user_keyboards import generate_inline_keyboard
-from utils.admin_utils import decline_order, accept_order, list_order, order_finished
-
-
-def is_admin(user_id: int) -> bool:
-    return user_id in ADMIN_ID
-
+from utils.admin_utils import decline_order, accept_order, list_order, order_finished, is_admin
 
 # Хэндлер для админ-панели
 def register_admin_handler(dp: Dispatcher, bot: Bot):

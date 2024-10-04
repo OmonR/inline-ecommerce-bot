@@ -6,7 +6,7 @@ from config import API_TOKEN
 from handlers import user, admin
 from db import orders_db, users_db, products_db, cart_db
 
-logging.basicConfig(level=logging.DEBUG)  #
+logging.basicConfig(level=logging.DEBUG)  ##logging.INFO или logging.WARNING — для продакшн-режима.
 
 bot = Bot(token=API_TOKEN)
 storage = MemoryStorage()

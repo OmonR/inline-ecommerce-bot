@@ -62,8 +62,6 @@ async def check_payment(bot, callback_query: types.CallbackQuery):
     invoice_status = invoices["result"]["items"][0]["status"]
 
     if invoice_status == "paid":
-        await callback_query.answer("Заказ не оплачен")
-    else:
         user_id = callback_query.from_user.id
         order = await new_order(user_id, delivery_method="delivery")
         if order:
@@ -72,7 +70,7 @@ async def check_payment(bot, callback_query: types.CallbackQuery):
             markup = decline_order_button(order_id)
             admin_markup = process_order_buttons(order_id)
             await callback_query.message.answer(
-                formatted_order, reply_markup=markup, parse_mode="HTML"
+                formatted_order+'\nВаши заказы: /orders', reply_markup=markup, parse_mode="HTML"
             )
             for admin_id in ADMIN_ID:
                 await bot.send_message(
